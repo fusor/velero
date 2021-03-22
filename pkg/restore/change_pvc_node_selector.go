@@ -26,6 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
 
+	api "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	"github.com/vmware-tanzu/velero/pkg/plugin/framework"
 	"github.com/vmware-tanzu/velero/pkg/plugin/velero"
 )
@@ -126,6 +127,10 @@ func (p *ChangePVCNodeSelectorAction) Execute(input *velero.RestoreItemActionExe
 	}
 
 	return velero.NewRestoreItemActionExecuteOutput(input.Item), nil
+}
+
+func (a *ChangePVCNodeSelectorAction) AreAdditionalItemsReady(restore *api.Restore, additionalItems []velero.ResourceIdentifier) (bool, error) {
+	return true, nil
 }
 
 func getNewNodeFromConfigMap(client corev1client.ConfigMapInterface, node string) (string, error) {

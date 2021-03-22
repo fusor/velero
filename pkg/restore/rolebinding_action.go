@@ -23,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 
+	api "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	"github.com/vmware-tanzu/velero/pkg/plugin/velero"
 )
 
@@ -64,4 +65,8 @@ func (a *RoleBindingAction) Execute(input *velero.RestoreItemActionExecuteInput)
 	}
 
 	return velero.NewRestoreItemActionExecuteOutput(&unstructured.Unstructured{Object: res}), nil
+}
+
+func (a *RoleBindingAction) AreAdditionalItemsReady(restore *api.Restore, additionalItems []velero.ResourceIdentifier) (bool, error) {
+	return true, nil
 }

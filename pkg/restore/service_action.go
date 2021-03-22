@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
 
+	api "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	"github.com/vmware-tanzu/velero/pkg/plugin/velero"
 )
 
@@ -65,6 +66,10 @@ func (a *ServiceAction) Execute(input *velero.RestoreItemActionExecuteInput) (*v
 	}
 
 	return velero.NewRestoreItemActionExecuteOutput(&unstructured.Unstructured{Object: res}), nil
+}
+
+func (a *ServiceAction) AreAdditionalItemsReady(restore *api.Restore, additionalItems []velero.ResourceIdentifier) (bool, error) {
+	return true, nil
 }
 
 func deleteNodePorts(service *corev1api.Service) error {

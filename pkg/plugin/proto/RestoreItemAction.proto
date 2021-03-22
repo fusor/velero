@@ -2,6 +2,7 @@ syntax = "proto3";
 package generated;
 
 import "Shared.proto";
+import "google/protobuf/duration.proto";
 
 message RestoreItemActionExecuteRequest {
     string plugin = 1;
@@ -14,11 +15,24 @@ message RestoreItemActionExecuteResponse {
     bytes item = 1;
     repeated ResourceIdentifier additionalItems = 2;
     bool skipRestore = 3;
+    bool waitForAdditionalItems = 4;
+    google.protobuf.Duration additionalItemsReadyTimeout = 5;
+}
+
+message AreAdditionalItemsReadyRequest {
+    string plugin = 1;
+    bytes restore = 2;
+    repeated ResourceIdentifier additionalItems = 3;
+}
+
+message AreAdditionalItemsReadyResponse {
+    bool ready = 1;
 }
 
 service RestoreItemAction {
     rpc AppliesTo(RestoreItemActionAppliesToRequest) returns (RestoreItemActionAppliesToResponse);
     rpc Execute(RestoreItemActionExecuteRequest) returns (RestoreItemActionExecuteResponse);
+    rpc AreAdditionalItemsReady(AreAdditionalItemsReadyRequest) returns (AreAdditionalItemsReadyResponse);
 }
 
 message RestoreItemActionAppliesToRequest {

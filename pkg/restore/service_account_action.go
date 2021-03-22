@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 
+	api "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	"github.com/vmware-tanzu/velero/pkg/plugin/velero"
 	"github.com/vmware-tanzu/velero/pkg/util/kube"
 )
@@ -76,4 +77,8 @@ func (a *ServiceAccountAction) Execute(input *velero.RestoreItemActionExecuteInp
 	}
 
 	return velero.NewRestoreItemActionExecuteOutput(&unstructured.Unstructured{Object: res}), nil
+}
+
+func (a *ServiceAccountAction) AreAdditionalItemsReady(restore *api.Restore, additionalItems []velero.ResourceIdentifier) (bool, error) {
+	return true, nil
 }

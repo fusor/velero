@@ -19,6 +19,7 @@ package mocks
 import (
 	mock "github.com/stretchr/testify/mock"
 
+	api "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	"github.com/vmware-tanzu/velero/pkg/plugin/velero"
 )
 
@@ -64,6 +65,27 @@ func (_m *ItemAction) Execute(input *velero.RestoreItemActionExecuteInput) (*vel
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*velero.RestoreItemActionExecuteInput) error); ok {
 		r1 = rf(input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ArreAdditionalItemsReady provides a mock function with given fields: input
+func (_m *ItemAction) AreAdditionalItemsReady(restore *api.Restore, additionalItems []velero.ResourceIdentifier) (bool, error) {
+	ret := _m.Called(restore, additionalItems)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(*api.Restore, []velero.ResourceIdentifier) bool); ok {
+		r0 = rf(restore, additionalItems)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*api.Restore, []velero.ResourceIdentifier) error); ok {
+		r1 = rf(restore, additionalItems)
 	} else {
 		r1 = ret.Error(1)
 	}

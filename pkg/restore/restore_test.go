@@ -1039,6 +1039,10 @@ func (a *recordResourcesAction) Execute(input *velero.RestoreItemActionExecuteIn
 	}, nil
 }
 
+func (a *recordResourcesAction) AreAdditionalItemsReady(restore *velerov1api.Restore, additionalItems []velero.ResourceIdentifier) (bool, error) {
+	return true, nil
+}
+
 func (a *recordResourcesAction) ForResource(resource string) *recordResourcesAction {
 	a.selector.IncludedResources = append(a.selector.IncludedResources, resource)
 	return a
@@ -1228,6 +1232,10 @@ func (a *pluggableAction) Execute(input *velero.RestoreItemActionExecuteInput) (
 
 func (a *pluggableAction) AppliesTo() (velero.ResourceSelector, error) {
 	return a.selector, nil
+}
+
+func (a *pluggableAction) AreAdditionalItemsReady(restore *velerov1api.Restore, additionalItems []velero.ResourceIdentifier) (bool, error) {
+	return true, nil
 }
 
 // TestRestoreActionModifications runs restores with restore item actions that modify resources, and

@@ -84,10 +84,11 @@ const (
 	// the port where prometheus metrics are exposed
 	defaultMetricsAddress = ":8085"
 
-	defaultBackupSyncPeriod           = time.Minute
-	defaultStoreValidationFrequency   = time.Minute
-	defaultPodVolumeOperationTimeout  = 240 * time.Minute
-	defaultResourceTerminatingTimeout = 10 * time.Minute
+	defaultBackupSyncPeriod            = time.Minute
+	defaultStoreValidationFrequency    = time.Minute
+	defaultPodVolumeOperationTimeout   = 240 * time.Minute
+	defaultResourceTerminatingTimeout  = 10 * time.Minute
+	defaultAdditionalItemsReadyTimeout = 10 * time.Minute
 
 	// server's client default qps and burst
 	defaultClientQPS   float32 = 20.0
@@ -127,6 +128,7 @@ var disableControllerList = []string{
 type serverConfig struct {
 	pluginDir, metricsAddress, defaultBackupLocation                        string
 	backupSyncPeriod, podVolumeOperationTimeout, resourceTerminatingTimeout time.Duration
+	additionalItemsReadyTimeout                                             time.Duration
 	defaultBackupTTL, storeValidationFrequency                              time.Duration
 	restoreResourcePriorities                                               []string
 	defaultVolumeSnapshotLocations                                          map[string]string
@@ -163,6 +165,7 @@ func NewCommand(f client.Factory) *cobra.Command {
 			clientBurst:                       defaultClientBurst,
 			profilerAddress:                   defaultProfilerAddress,
 			resourceTerminatingTimeout:        defaultResourceTerminatingTimeout,
+			additionalItemsReadyTimeout:       defaultAdditionalItemsReadyTimeout,
 			formatFlag:                        logging.NewFormatFlag(),
 			defaultResticMaintenanceFrequency: restic.DefaultMaintenanceFrequency,
 			defaultVolumesToRestic:            restic.DefaultVolumesToRestic,
@@ -226,6 +229,7 @@ func NewCommand(f client.Factory) *cobra.Command {
 	command.Flags().IntVar(&config.clientBurst, "client-burst", config.clientBurst, "Maximum number of requests by the server to the Kubernetes API in a short period of time.")
 	command.Flags().StringVar(&config.profilerAddress, "profiler-address", config.profilerAddress, "The address to expose the pprof profiler.")
 	command.Flags().DurationVar(&config.resourceTerminatingTimeout, "terminating-resource-timeout", config.resourceTerminatingTimeout, "How long to wait on persistent volumes and namespaces to terminate during a restore before timing out.")
+	command.Flags().DurationVar(&config.additionalItemsReadyTimeout, "additional-items-ready-timeout", config.additionalItemsReadyTimeout, "How long for RestoreItemAction plugin to wait for returned additional items to be ready before timing out.")
 	command.Flags().DurationVar(&config.defaultBackupTTL, "default-backup-ttl", config.defaultBackupTTL, "How long to wait by default before backups can be garbage collected.")
 	command.Flags().DurationVar(&config.defaultResticMaintenanceFrequency, "default-restic-prune-frequency", config.defaultResticMaintenanceFrequency, "How often 'restic prune' is run for restic repositories by default.")
 	command.Flags().BoolVar(&config.defaultVolumesToRestic, "default-volumes-to-restic", config.defaultVolumesToRestic, "Backup all volumes with restic by default.")
@@ -719,6 +723,7 @@ func (s *server) runControllers(defaultVolumeSnapshotLocations map[string]string
 			s.resticManager,
 			s.config.podVolumeOperationTimeout,
 			s.config.resourceTerminatingTimeout,
+			s.config.additionalItemsReadyTimeout,
 			s.logger,
 			podexec.NewPodCommandExecutor(s.kubeClientConfig, s.kubeClient.CoreV1().RESTClient()),
 			s.kubeClient.CoreV1().RESTClient(),

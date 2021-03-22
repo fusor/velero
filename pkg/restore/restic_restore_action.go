@@ -166,6 +166,10 @@ func (a *ResticRestoreAction) Execute(input *velero.RestoreItemActionExecuteInpu
 	return velero.NewRestoreItemActionExecuteOutput(&unstructured.Unstructured{Object: res}), nil
 }
 
+func (a *ResticRestoreAction) AreAdditionalItemsReady(restore *velerov1api.Restore, additionalItems []velero.ResourceIdentifier) (bool, error) {
+	return true, nil
+}
+
 func getCommand(log logrus.FieldLogger, config *corev1.ConfigMap) []string {
 	if config == nil {
 		log.Debug("No config found for plugin")

@@ -19,6 +19,7 @@ package clientmgmt
 import (
 	"github.com/pkg/errors"
 
+	api "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	"github.com/vmware-tanzu/velero/pkg/plugin/framework"
 	"github.com/vmware-tanzu/velero/pkg/plugin/velero"
 )
@@ -85,4 +86,14 @@ func (r *restartableRestoreItemAction) Execute(input *velero.RestoreItemActionEx
 	}
 
 	return delegate.Execute(input)
+}
+
+// Execute restarts the plugin's process if needed, then delegates the call.
+func (r *restartableRestoreItemAction) AreAdditionalItemsReady(restore *api.Restore, additionalItems []velero.ResourceIdentifier) (bool, error) {
+	delegate, err := r.getDelegate()
+	if err != nil {
+		return false, err
+	}
+
+	return delegate.AreAdditionalItemsReady(restore, additionalItems)
 }

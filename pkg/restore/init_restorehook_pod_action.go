@@ -22,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/vmware-tanzu/velero/internal/hook"
+	api "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	"github.com/vmware-tanzu/velero/pkg/kuberesource"
 	"github.com/vmware-tanzu/velero/pkg/plugin/velero"
 )
@@ -57,4 +58,8 @@ func (a *InitRestoreHookPodAction) Execute(input *velero.RestoreItemActionExecut
 	a.logger.Infof("Returning from InitRestoreHookPodAction")
 
 	return velero.NewRestoreItemActionExecuteOutput(&unstructured.Unstructured{Object: postHooksItem.UnstructuredContent()}), nil
+}
+
+func (a *InitRestoreHookPodAction) AreAdditionalItemsReady(restore *api.Restore, additionalItems []velero.ResourceIdentifier) (bool, error) {
+	return true, nil
 }

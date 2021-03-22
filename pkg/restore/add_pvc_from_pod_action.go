@@ -22,6 +22,7 @@ import (
 	corev1api "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
+	api "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	"github.com/vmware-tanzu/velero/pkg/kuberesource"
 	"github.com/vmware-tanzu/velero/pkg/plugin/velero"
 )
@@ -67,4 +68,8 @@ func (a *AddPVCFromPodAction) Execute(input *velero.RestoreItemActionExecuteInpu
 		UpdatedItem:     input.Item,
 		AdditionalItems: additionalItems,
 	}, nil
+}
+
+func (a *AddPVCFromPodAction) AreAdditionalItemsReady(restore *api.Restore, additionalItems []velero.ResourceIdentifier) (bool, error) {
+	return true, nil
 }

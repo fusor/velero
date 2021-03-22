@@ -26,6 +26,7 @@ import (
 	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
 	storagev1client "k8s.io/client-go/kubernetes/typed/storage/v1"
 
+	api "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	"github.com/vmware-tanzu/velero/pkg/plugin/framework"
 	"github.com/vmware-tanzu/velero/pkg/plugin/velero"
 )
@@ -116,4 +117,8 @@ func (a *ChangeStorageClassAction) Execute(input *velero.RestoreItemActionExecut
 	}
 
 	return velero.NewRestoreItemActionExecuteOutput(obj), nil
+}
+
+func (a *ChangeStorageClassAction) AreAdditionalItemsReady(restore *api.Restore, additionalItems []velero.ResourceIdentifier) (bool, error) {
+	return true, nil
 }
