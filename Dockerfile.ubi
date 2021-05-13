@@ -1,21 +1,20 @@
-FROM openshift/origin-release:golang-1.14 AS builder
-COPY . /go/src/github.com/vmware-tanzu/velero
-RUN cd /go/src/github.com/vmware-tanzu/velero \
-&& CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static" -X github.com/vmware-tanzu/velero/pkg/buildinfo.Version=v1.5.2-konveyor' -mod=vendor ./cmd/velero
+FROM registry.access.redhat.com/ubi8/go-toolset:1.14.7 AS builder
+ENV GOPATH=$APP_ROOT
+COPY . $APP_ROOT/src/github.com/vmware-tanzu/velero
+WORKDIR $APP_ROOT/src/github.com/vmware-tanzu/velero
+RUN CGO_ENABLED=0 GOOS=linux go build -a -mod=vendor -ldflags '-extldflags "-static" -X github.com/vmware-tanzu/velero/pkg/buildinfo.Version=v1.5.2-konveyor' -o $APP_ROOT/src/velero github.com/vmware-tanzu/velero/cmd/velero
 
-RUN mkdir /go/src/github.com/restic \
-&& cd /go/src/github.com/restic \
-&& git clone https://github.com/konveyor/restic -b konveyor-dev \
-&& cd /go/src/github.com/restic/restic \
-&& CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' ./cmd/restic
+FROM registry.access.redhat.com/ubi8/go-toolset:1.14.7 AS restic-builder
+ENV GOPATH=$APP_ROOT
+RUN mkdir -p $APP_ROOT/src/github.com/restic \
+&& cd $APP_ROOT/src/github.com/restic \
+&& git clone https://github.com/konveyor/restic -b konveyor-dev
+WORKDIR $APP_ROOT/src/github.com/restic/restic
+RUN CGO_ENABLED=0 GOOS=linux go build -a -mod=vendor -ldflags '-extldflags "-static"' -o $APP_ROOT/src/restic github.com/restic/restic/cmd/restic
 
 FROM registry.access.redhat.com/ubi8-minimal
-RUN microdnf -y install nmap-ncat && microdnf clean all
-RUN microdnf -y update && microdnf clean all
-
-COPY --from=builder /go/src/github.com/vmware-tanzu/velero/velero velero
-COPY --from=builder /go/src/github.com/restic/restic/restic /usr/bin/restic
-
+RUN microdnf -y update && microdnf -y install nmap-ncat && microdnf clean all
+COPY --from=builder /opt/app-root/src/velero velero
+COPY --from=restic-builder /opt/app-root/src/restic /usr/bin/restic
 USER nobody:nobody
-
 ENTRYPOINT ["/velero"]
